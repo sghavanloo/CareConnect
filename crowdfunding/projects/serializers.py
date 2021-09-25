@@ -14,6 +14,17 @@ class PledgeSerializer(serializers.Serializer):
     def create(self, validated_data):
         return Pledge.objects.create(**validated_data)
 
+class PledgeDetailSerializer(PledgeSerializer):
+    # pledges = PledgeSerializer(many=True, read_only=True)
+    def update(self, instance, validated_data):
+        instance.amount = validated_data.get('amount',instance.amount)
+        instance.comment = validated_data.get('comment',instance.comment)
+        instance.anonymous = validated_data.get('anonymous',instance.anonymous)
+        instance.supporter = validated_data.get('supporter',instance.supporter)
+        instance.project_id = validated_data.get('project_id',instance.project_id)
+        instance.save()
+        return instance
+
 class ProjectSerializer(serializers.Serializer):
     id = serializers.ReadOnlyField()
     categories = serializers.JSONField (default=list)
@@ -26,8 +37,14 @@ class ProjectSerializer(serializers.Serializer):
     #owner = serializers.CharField(max_length=200), users page 6
     owner = serializers.ReadOnlyField(source='owner.id')
     #pledges = PledgeSerializer(many=True, read_only=True)
-
-    def create(self, validated_data):
+total_pledges = serializers.SerializerMethodField()
+def get_total_pledges(self, project):
+        pledges = Pledge.objects.filter(project=project)
+        total_amount = 0 
+        for pledge in pledges:
+            total_amount += pledge.amount
+        return total_amount
+def create(self, validated_data):
         return Project.objects.create(**validated_data)
 
 class ProjectDetailSerializer(ProjectSerializer):
