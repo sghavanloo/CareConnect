@@ -37,8 +37,9 @@ class ProjectSerializer(serializers.Serializer):
     #owner = serializers.CharField(max_length=200), users page 6
     owner = serializers.ReadOnlyField(source='owner.id')
     #pledges = PledgeSerializer(many=True, read_only=True)
-total_pledges = serializers.SerializerMethodField()
-def get_total_pledges(self, project):
+    total_pledges = serializers.SerializerMethodField()
+
+    def get_total_pledges(self, project):
         pledges = Pledge.objects.filter(project=project)
         total_amount = 0 
         for pledge in pledges:
